@@ -1,38 +1,256 @@
-.App {
-  text-align: center;
+/* General styles */
+body {
+  margin: 0;
+  font-family: sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-.App-logo {
-  height: 40vmin;
-  pointer-events: none;
-}
-
-@media (prefers-reduced-motion: no-preference) {
-  .App-logo {
-    animation: App-logo-spin infinite 20s linear;
-  }
-}
-
-.App-header {
-  background-color: #282c34;
+.app-container {
   min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+  background-color: #1e293b;
+  color: #f1f5f9;
+}
+
+.app-header {
+  background-color: #334155;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  padding: 1rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 1rem;
+}
+
+.header-button {
+  display: flex;
+  align-items: center;
+  background: none;
+  border: none;
+  color: #94a3b8;
+  transition: color 0.3s;
+  cursor: pointer;
+}
+
+.header-button:hover {
+  color: #fff;
+}
+
+.icon {
+  width: 1.5rem;
+  height: 1.5rem;
+  margin-right: 0.25rem;
+}
+
+.app-main {
+  flex: 1;
+}
+
+/* Welcome Screen */
+.welcome-container {
   display: flex;
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  font-size: calc(10px + 2vmin);
-  color: white;
+  height: 100%;
+  padding: 1rem;
 }
 
-.App-link {
-  color: #61dafb;
+.welcome-title {
+  font-size: 3rem;
+  font-weight: 800;
+  margin-bottom: 2rem;
+  color: #2dd4bf;
 }
 
-@keyframes App-logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
+.welcome-subtitle {
+  font-size: 1.25rem;
+  margin-bottom: 2rem;
+  text-align: center;
+  color: #94a3b8;
+}
+
+.input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  width: 100%;
+  max-width: 24rem;
+}
+
+.input-field {
+  padding: 0.75rem;
+  border-radius: 0.75rem;
+  background-color: #334155;
+  border: 1px solid #475569;
+  color: #fff;
+}
+
+.input-field:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px #2dd4bf;
+}
+
+.button {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #10b981;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: transform 0.3s, background-color 0.3s;
+  cursor: pointer;
+}
+
+.button:hover {
+  transform: scale(1.05);
+  background-color: #059669;
+}
+
+/* Game Screen */
+.game-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.game-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #2dd4bf;
+}
+
+.game-subtitle {
+  color: #94a3b8;
+  margin-bottom: 1.5rem;
+  text-align: center;
+}
+
+.button-guess {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: #10b981;
+  color: #fff;
+  font-weight: 700;
+  padding: 0.75rem 1.5rem;
+  border-radius: 0.75rem;
+  transition: transform 0.3s, background-color 0.3s;
+  cursor: pointer;
+}
+
+.button-guess:hover {
+  transform: scale(1.05);
+  background-color: #059669;
+}
+
+.message {
+  margin-top: 1.5rem;
+  font-size: 1.25rem;
+  font-weight: 600;
+  text-align: center;
+}
+
+.message-correct {
+  color: #4ade80;
+}
+
+.message-incorrect {
+  color: #f43f5e;
+}
+
+/* History Screen */
+.history-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 1.5rem;
+  height: 100%;
+  overflow-y: auto;
+}
+
+.history-title {
+  font-size: 1.875rem;
+  font-weight: 700;
+  margin-bottom: 1.5rem;
+  text-align: center;
+  color: #2dd4bf;
+}
+
+.history-list {
+  width: 100%;
+  max-width: 48rem;
+}
+
+.history-item {
+  background-color: #334155;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+  margin-bottom: 1rem;
+  border: 1px solid #475569;
+}
+
+.history-item-title {
+  font-size: 1.125rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.history-item-text {
+  color: #94a3b8;
+}
+
+.history-item-text span {
+  color: #2dd4bf;
+  font-weight: 500;
+}
+
+.history-item-attempts {
+  margin-top: 0.5rem;
+  font-size: 0.875rem;
+  color: #64748b;
+}
+
+.no-history-text {
+  color: #94a3b8;
+  margin-top: 2.5rem;
+}
+
+/* End Game Screen */
+.end-container {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  height: 100%;
+  padding: 1rem;
+}
+
+.end-title {
+  font-size: 2.25rem;
+  font-weight: 700;
+  margin-bottom: 1rem;
+  text-align: center;
+  color: #4ade80;
+}
+
+.end-winner {
+  font-size: 1.5rem;
+  color: #fff;
+  margin-bottom: 1.5rem;
+}
+
+.end-winner span {
+  font-weight: 800;
+  color: #4ade80;
 }
