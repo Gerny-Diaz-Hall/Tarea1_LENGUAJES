@@ -68,20 +68,19 @@ router.post('/games/start', async (req, res) => {
         console.log('Resultado del juego:', gameResult.recordset);
 
         const gameId = gameResult.recordset[0].ID_Juego;
-
-        const player1SecretNumber = generateSecretNumber(1, 100);
-        const player2SecretNumber = generateSecretNumber(1, 100);
+        const secretNumber = generateSecretNumber(1, 100); // Un solo número secreto para ambos
 
         await sql.query`
             INSERT INTO Rondas (JuegoID, JugadorID, Numero, intentos, Tiempo_Tomado)
-            VALUES (${gameId}, ${player1Id}, ${player1SecretNumber}, 0, 0),
-                   (${gameId}, ${player2Id}, ${player2SecretNumber}, 0, 0);
+            VALUES (${gameId}, ${player1Id}, ${secretNumber}, 0, 0),
+                   (${gameId}, ${player2Id}, ${secretNumber}, 0, 0);
         `;
 
         activeGames[gameId] = {
-            player1: { id: player1Id, name: player1, secret: player1SecretNumber, attempts: 0, time: 0 },
-            player2: { id: player2Id, name: player2, secret: player2SecretNumber, attempts: 0, time: 0 },
-            currentPlayerId: player1Id
+            player1: { id: player1Id, name: player1, attempts: 0, time: 0, turnStartTime: null },
+            player2: { id: player2Id, name: player2, attempts: 0, time: 0, turnStartTime: null },
+            currentPlayerId: player1Id,
+            secretNumber: secretNumber // Guardamos el número secreto en el objeto del juego
         };
 
         res.status(201).json({
@@ -91,7 +90,7 @@ router.post('/games/start', async (req, res) => {
                 { id: player2Id, name: player2, attempts: 0 }
             ],
             currentPlayer: { id: player1Id, name: player1, attempts: 0 },
-            message: '¡El juego ha comenzado!',
+            message: '¡El juego ha comenzado! El número secreto ha sido generado.',
             status: 'in-progress'
         });
 
@@ -106,60 +105,105 @@ router.post('/games/:gameId/guess', async (req, res) => {
     try {
         const { gameId } = req.params;
         const { player_id, guess } = req.body;
-        
-        // Verificar si la partida existe en memoria
+        const guessNumber = parseInt(guess);
+
         const game = activeGames[gameId];
         if (!game) {
             return res.status(404).send('Partida no encontrada.');
         }
 
-        // Identificar al jugador actual y su oponente
         const currentPlayer = (game.player1.id == player_id) ? game.player1 : game.player2;
         const opponent = (game.player1.id == player_id) ? game.player2 : game.player1;
 
-        // Aumentar el contador de intentos del jugador
+        // Si es el primer intento del turno, registra el tiempo inicial
+        if (!currentPlayer.turnStartTime) {
+            currentPlayer.turnStartTime = Date.now();
+        }
+
+        // Calcula el tiempo transcurrido en este turno
+        const turnTime = (Date.now() - currentPlayer.turnStartTime); // Convertir a segundos
+        currentPlayer.time += turnTime; // Acumula el tiempo total del jugador
+
+        if (currentPlayer.attempts >= 3) {
+            return res.status(403).json({ message: 'Ya agotaste tus 3 intentos.' });
+        }
+
+        if (game.currentPlayerId != player_id) {
+            return res.status(403).json({ message: 'No es tu turno.' });
+        }
+
         currentPlayer.attempts++;
-        
+
         let message;
+        let finished = false;
+        let winnerId = null;
 
-        if (guess === opponent.secret) {
-            message = `¡Correcto! ¡Has adivinado el número secreto de tu oponente!`;
-            
-            // Lógica para terminar la partida y declarar un ganador
-            const winnerId = currentPlayer.id;
-            const winnerName = currentPlayer.name;
-
-            // Actualizar los intentos y el ganador en la base de datos
-            await sql.query`
-                UPDATE Juegos
-                SET 
-                    Intentos_Totalj1 = ${game.player1.attempts},
-                    Intentos_Totalj2 = ${game.player2.attempts},
-                    ID_Ganador = ${winnerId}
-                WHERE ID_Juego = ${gameId};
-            `;
-            
-            // Eliminar el juego de la memoria
-            delete activeGames[gameId];
-            
-            return res.status(200).json({ message, status: 'finished', winner: winnerName });
-        } else if (guess > opponent.secret) {
+        if (guessNumber === game.secretNumber) {
+            message = `¡Correcto! Has adivinado el número secreto (${game.secretNumber}).`;
+            finished = true;
+            winnerId = currentPlayer.id;
+        } else if (guessNumber > game.secretNumber) {
             message = 'Demasiado alto. Intenta un número más bajo.';
         } else {
             message = 'Demasiado bajo. Intenta un número más alto.';
         }
 
-        // Cambiar el turno al otro jugador
+        if (finished || (game.player1.attempts >= 3 && game.player2.attempts >= 3)) {
+            await sql.query`
+                UPDATE Juegos
+                SET 
+                    Intentos_Totalj1 = ${game.player1.attempts},
+                    Intentos_Totalj2 = ${game.player2.attempts},
+                    Tiempo_Totalj1 = ${game.player1.time},
+                    Tiempo_Totalj2 = ${game.player2.time},
+                    ID_Ganador = ${winnerId}
+                WHERE ID_Juego = ${gameId};
+            `;
+            delete activeGames[gameId];
+            return res.status(200).json({
+                message: finished ? message : `Nadie adivinó el número secreto (${game.secretNumber}). Fin del juego.`,
+                status: 'finished',
+                winner: finished ? currentPlayer.name : null,
+                secretNumber: game.secretNumber,
+                players: [
+                    { 
+                        name: game.player1.name, 
+                        attempts: game.player1.attempts,
+                        time: game.player1.time
+                    },
+                    { 
+                        name: game.player2.name, 
+                        attempts: game.player2.attempts,
+                        time: game.player2.time
+                    }
+                ],
+                times: {
+                    player1: game.player1.time,
+                    player2: game.player2.time
+                }
+            });
+        }
+
+        // Reinicia el tiempo inicial para el siguiente turno
+        currentPlayer.turnStartTime = null;
+        opponent.turnStartTime = Date.now();
         game.currentPlayerId = opponent.id;
-        
-        res.status(200).json({ message, status: 'in-progress', currentPlayer: opponent });
-        
+
+        return res.status(200).json({
+            message: `${message} Te quedan ${3 - currentPlayer.attempts} intentos. Ahora es turno de ${opponent.name}.`,
+            status: 'in-progress',
+            currentPlayer: { 
+                id: opponent.id, 
+                name: opponent.name, 
+                attempts: opponent.attempts,
+                time: Math.round(opponent.time)
+            }
+        });
 
     } catch (err) {
         console.error('Error al manejar el intento:', err);
         res.status(500).send('Error interno del servidor.');
     }
-
 });
 
 // Ruta para obtener el historial de partidas

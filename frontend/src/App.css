@@ -113,59 +113,120 @@ body {
 
 /* Game Screen */
 .game-container {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  height: 100%;
-  padding: 1rem;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 2rem;
+    max-width: 600px;
+    margin: 0 auto;
 }
 
 .game-title {
-  font-size: 1.875rem;
-  font-weight: 700;
-  margin-bottom: 1rem;
-  text-align: center;
-  color: #2dd4bf;
+    font-size: 2rem;
+    font-weight: bold;
+    color: #06b6d4;
+    margin-bottom: 1.5rem;
+    text-align: center;
+}
+
+.game-content {
+    width: 100%;
+    text-align: center;
 }
 
 .game-subtitle {
-  color: #94a3b8;
-  margin-bottom: 1.5rem;
-  text-align: center;
+    font-size: 1.2rem;
+    color: #94a3b8;
+    margin-bottom: 0.5rem;
 }
 
-.button-guess {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  background-color: #10b981;
-  color: #fff;
-  font-weight: 700;
-  padding: 0.75rem 1.5rem;
-  border-radius: 0.75rem;
-  transition: transform 0.3s, background-color 0.3s;
-  cursor: pointer;
-}
-
-.button-guess:hover {
-  transform: scale(1.05);
-  background-color: #059669;
+.game-subtitle span {
+    color: #14b8a6;
+    font-weight: 600;
 }
 
 .message {
-  margin-top: 1.5rem;
-  font-size: 1.25rem;
-  font-weight: 600;
-  text-align: center;
+    margin-top: 1rem;
+    padding: 0.75rem;
+    border-radius: 0.5rem;
+    font-weight: 500;
 }
 
 .message-correct {
-  color: #4ade80;
+    color: #34d399;
+    background-color: rgba(52, 211, 153, 0.1);
 }
 
 .message-incorrect {
-  color: #f43f5e;
+    color: #f87171;
+    background-color: rgba(248, 113, 113, 0.1);
+}
+
+.end-container {
+    text-align: center;
+}
+
+.end-winner {
+    font-size: 1.5rem;
+    color: #94a3b8;
+    margin: 1rem 0;
+}
+
+.end-winner span {
+    color: #14b8a6;
+    font-weight: 600;
+}
+
+/* Game Screen - Input Section */
+.game-input-section {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+    margin: 1.5rem auto;
+    width: 100%;
+    max-width: 400px;
+}
+
+.game-input-field {
+    padding: 0.75rem;
+    border-radius: 0.75rem;
+    background-color: #334155;
+    border: 1px solid #475569;
+    color: #fff;
+    width: 150px;
+    text-align: center;
+    font-size: 1.1rem;
+}
+
+.game-input-field:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px #2dd4bf;
+}
+
+.game-button {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background-color: #10b981;
+    color: #fff;
+    font-weight: 700;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.75rem;
+    transition: transform 0.3s, background-color 0.3s;
+    cursor: pointer;
+    border: none;
+}
+
+.game-button:hover {
+    transform: scale(1.05);
+    background-color: #059669;
+}
+
+.game-button:disabled {
+    background-color: #475569;
+    cursor: not-allowed;
+    transform: none;
 }
 
 /* History Screen */
@@ -253,4 +314,177 @@ body {
 .end-winner span {
   font-weight: 800;
   color: #4ade80;
+}
+
+/* Modal Styles */
+.modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.75);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+}
+
+.modal-content {
+    background-color: #0f172a;
+    padding: 2rem;
+    border-radius: 1rem;
+    box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
+    max-width: 500px;
+    width: 90%;
+    animation: modalAppear 0.3s ease-out;
+}
+
+@keyframes modalAppear {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.modal-title {
+    color: #06b6d4;
+    font-size: 1.75rem;
+    font-weight: bold;
+    text-align: center;
+    margin-bottom: 1.5rem;
+}
+
+.modal-players {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.modal-player {
+    background-color: #1e293b;
+    padding: 1rem;
+    border-radius: 0.75rem;
+}
+
+.modal-player h3 {
+    color: #14b8a6;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.modal-player p {
+    color: #94a3b8;
+    margin: 0.25rem 0;
+}
+
+.modal-result {
+    text-align: center;
+    margin: 1.5rem 0;
+}
+
+.winner-text {
+    color: #34d399;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.draw-text {
+    color: #fbbf24;
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.secret-number {
+    color: #94a3b8;
+    font-size: 1.1rem;
+}
+
+.modal-button {
+    background-color: #2563eb;
+    color: white;
+    font-weight: 600;
+    padding: 0.75rem 1.5rem;
+    border-radius: 0.5rem;
+    width: 100%;
+    margin-top: 1.5rem;
+    transition: background-color 0.3s;
+}
+
+.modal-button:hover {
+    background-color: #1d4ed8;
+}
+
+/* History Table Styles */
+.table-container {
+    width: 100%;
+    overflow-x: auto;
+    margin-top: 2rem;
+    background-color: #1e293b;
+    border-radius: 1rem;
+    padding: 1rem;
+}
+
+.history-table {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 0;
+    color: #e2e8f0;
+}
+
+.history-table th,
+.history-table td {
+    padding: 1rem;
+    text-align: center;
+    border-bottom: 1px solid #334155;
+}
+
+.history-table th {
+    background-color: #0f172a;
+    color: #06b6d4;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+}
+
+.history-table tr:hover {
+    background-color: #334155;
+}
+
+.history-table td {
+    transition: all 0.2s;
+}
+
+.winner {
+    color: #34d399;
+    font-weight: 600;
+}
+
+.draw {
+    color: #fbbf24;
+    font-weight: 600;
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .table-container {
+        margin: 1rem -1rem;
+        border-radius: 0;
+    }
+
+    .history-table {
+        font-size: 0.875rem;
+    }
+
+    .history-table th,
+    .history-table td {
+        padding: 0.75rem 0.5rem;
+    }
 }
