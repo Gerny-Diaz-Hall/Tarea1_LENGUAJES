@@ -55,6 +55,7 @@ function GameScreen({ gameData, onMakeGuess, onRestart }) {
     const [summaryData, setSummaryData] = useState(null);
 
     useEffect(() => {
+        // Actualizar datos del resumen cuando el juego termina
         if (gameData?.status === 'finished' && !showSummary) {
             setSummaryData({
                 player1: {
@@ -72,8 +73,14 @@ function GameScreen({ gameData, onMakeGuess, onRestart }) {
             });
             setShowSummary(true);
         }
+
+        // Actualizar mensaje cuando cambia el estado del juego
+        if (gameData?.message) {
+            setMessage(gameData.message);
+        }
     }, [
         gameData?.status,
+        gameData?.message,
         gameData?.players,
         gameData?.secretNumber,
         gameData?.times?.player1,
@@ -82,28 +89,40 @@ function GameScreen({ gameData, onMakeGuess, onRestart }) {
         showSummary
     ]);
 
-
     const handleGuess = async () => {
-        if (!guess) return;
-        setIsLoading(true);
+        // Validación del input
+        if (!guess) {
+            setMessage('Por favor, ingresa un número.');
+            return;
+        }
+
         const guessValue = parseInt(guess);
-        if (isNaN(guessValue)) {
-            setMessage('Por favor, ingresa un número válido.');
-            setIsLoading(false);
+        if (isNaN(guessValue) || guessValue < 1 || guessValue > 100) {
+            setMessage('Por favor, ingresa un número válido entre 1 y 100.');
             return;
         }
 
-        const response = await onMakeGuess(gameData.gameId, gameData.currentPlayer.id, guessValue);
+        setIsLoading(true);
 
-        // Aquí agregas la validación:
-        if (!response || !response.message) {
-            setMessage('Error al procesar el intento. Intenta de nuevo.');
+        try {
+            const response = await onMakeGuess(
+                gameData.gameId, 
+                gameData.currentPlayer.id, 
+                guessValue
+            );
+
+            if (response?.message) {
+                setMessage(response.message);
+                setGuess(''); // Limpiar input solo si el intento fue válido
+            } else {
+                setMessage('Error al procesar el intento. Intenta de nuevo.');
+            }
+        } catch (error) {
+            console.error('Error en el intento:', error);
+            setMessage('Error de conexión. Intenta de nuevo.');
+        } finally {
             setIsLoading(false);
-            return;
         }
-        setMessage(response.message);
-        setGuess('');
-        setIsLoading(false);
     };
 
     const isFinished = gameData?.status === 'finished';
@@ -126,19 +145,27 @@ function GameScreen({ gameData, onMakeGuess, onRestart }) {
                 </div>
             ) : (
                 <div className="game-content">
-                    <p className="game-subtitle">
-                        Turno de: <span>{gameData.currentPlayer.name}</span>
-                    </p>
-                    <p className="game-subtitle">
-                        Intentos: <span>{gameData.currentPlayer.attempts}</span>
-                    </p>
+                    <div className="game-info">
+                        <p className="game-round">
+                            Ronda {Math.ceil(gameData.currentRound / 2)} de 3
+                        </p>
+                        <p className="game-subtitle">
+                            Turno de: <span>{gameData.currentPlayer.name}</span>
+                        </p>
+                        <p className="game-subtitle">
+                            Intentos: <span>{gameData.currentPlayer.attempts}</span> de 3
+                        </p>
+                    </div>
+
                     <div className="game-input-section">
                         <input
                             type="number"
                             value={guess}
                             onChange={(e) => setGuess(e.target.value)}
-                            placeholder="Tu número"
-                            className="input-field"
+                            placeholder="Tu número (1-100)"
+                            className="game-input-field"
+                            min="1"
+                            max="100"
                             onKeyDown={(e) => {
                                 if (e.key === 'Enter') handleGuess();
                             }}
@@ -152,6 +179,7 @@ function GameScreen({ gameData, onMakeGuess, onRestart }) {
                             Adivinar
                         </button>
                     </div>
+
                     {message && (
                         <p className={`message ${
                             message.includes('Correcto') || message.includes('ganador')
@@ -288,9 +316,11 @@ export default function App() {
                 return data;
             } else {
                 console.error('Error al hacer el intento:', data.message);
+                return { message: data.message || 'Error al hacer el intento' };
             }
         } catch (error) {
             console.error('Error de red:', error);
+            return { message: 'Error de conexión' };
         } finally {
             setIsLoading(false);
         }

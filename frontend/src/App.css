@@ -472,6 +472,21 @@ body {
     font-weight: 600;
 }
 
+.time-detail {
+    font-size: 0.9rem;
+    color: #94a3b8;
+    display: block;
+    margin-top: 0.5rem;
+}
+
+.winner-text {
+    color: #34d399;
+    font-size: 1.25rem;
+    font-weight: 600;
+    text-align: center;
+    margin: 1rem 0;
+}
+
 /* Responsive adjustments */
 @media (max-width: 768px) {
     .table-container {
